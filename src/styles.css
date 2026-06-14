@@ -1,0 +1,9 @@
+@import "./styles/base.css";
+@import "./styles/home.css";
+@import "./styles/forms.css";
+@import "./styles/dashboard.css";
+@import "./styles/assistant.css";
+@import "./styles/tracker.css";
+@import "./styles/simulator.css";
+@import "./styles/shell.css";
+@import "./styles/responsive.css";
