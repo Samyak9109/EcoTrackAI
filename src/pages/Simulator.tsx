@@ -118,7 +118,12 @@ export function Simulator({
           </article>
           <article className="panel score-comparison">
             <div><span>Current score</span><strong>{simulation.current.score}</strong></div>
-            <div className="score-line"><span style={{ width: `${simulation.projected.score}%` }} /></div>
+            <progress
+              className="score-line"
+              max={100}
+              value={simulation.projected.score}
+              aria-label="Projected carbon score"
+            />
             <div><span>Projected score</span><strong>{simulation.projected.score}</strong></div>
           </article>
           <p className="disclaimer">Scenario estimates use simplified factors and should be treated as directional.</p>

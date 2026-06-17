@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 
 export type PageId =
   | "home"
@@ -16,6 +16,15 @@ const NAV_ITEMS: { id: PageId; label: string }[] = [
   { id: "simulator", label: "Simulator" },
 ];
 
+const PAGE_TITLES: Record<PageId, string> = {
+  home: "EcoTrack AI",
+  dashboard: "Dashboard | EcoTrack AI",
+  profile: "Profile | EcoTrack AI",
+  assistant: "Assistant | EcoTrack AI",
+  tracker: "Action Tracker | EcoTrack AI",
+  simulator: "What-if Simulator | EcoTrack AI",
+};
+
 type LayoutProps = {
   activePage: PageId;
   children: ReactNode;
@@ -23,10 +32,29 @@ type LayoutProps = {
 };
 
 export function Layout({ activePage, children, onNavigate }: LayoutProps) {
+  const mainRef = useRef<HTMLElement>(null);
+  const previousPage = useRef(activePage);
+
+  useEffect(() => {
+    document.title = PAGE_TITLES[activePage];
+    if (previousPage.current !== activePage) {
+      mainRef.current?.focus();
+      previousPage.current = activePage;
+    }
+  }, [activePage]);
+
   return (
     <div>
+      <a className="skip-link" href="#main-content">
+        Skip to main content
+      </a>
       <header className="site-header">
-        <button className="brand" onClick={() => onNavigate("home")} type="button">
+        <button
+          className="brand"
+          onClick={() => onNavigate("home")}
+          type="button"
+          aria-current={activePage === "home" ? "page" : undefined}
+        >
           <span className="brand-mark" aria-hidden="true">
             E
           </span>
@@ -39,6 +67,7 @@ export function Layout({ activePage, children, onNavigate }: LayoutProps) {
               key={item.id}
               onClick={() => onNavigate(item.id)}
               type="button"
+              aria-current={activePage === item.id ? "page" : undefined}
             >
               {item.label}
             </button>
@@ -53,7 +82,9 @@ export function Layout({ activePage, children, onNavigate }: LayoutProps) {
         </button>
       </header>
 
-      <main id="main-content">{children}</main>
+      <main id="main-content" ref={mainRef} tabIndex={-1}>
+        {children}
+      </main>
 
       <nav className="mobile-nav" aria-label="Mobile navigation">
         {NAV_ITEMS.map((item) => (
@@ -62,6 +93,7 @@ export function Layout({ activePage, children, onNavigate }: LayoutProps) {
             key={item.id}
             onClick={() => onNavigate(item.id)}
             type="button"
+            aria-current={activePage === item.id ? "page" : undefined}
           >
             <span className="mobile-nav-icon" aria-hidden="true">
               {item.label.charAt(0)}

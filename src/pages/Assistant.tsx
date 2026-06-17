@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent } from "react";
 import { ActionCard } from "../components/ActionCard";
 import type { PageId } from "../components/Layout/Layout";
 import { ProfileRequiredState } from "../components/ProfileRequiredState";
@@ -19,6 +19,8 @@ const PROMPTS = [
   "Why is my score low?",
   "What if I use the bus?",
 ];
+const MAX_MESSAGE_LENGTH = 500;
+const MAX_MESSAGES = 40;
 
 export function Assistant({
   profile,
@@ -30,6 +32,7 @@ export function Assistant({
   onNavigate: (page: PageId) => void;
 }) {
   const [input, setInput] = useState("");
+  const nextMessageId = useRef(2);
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 1,
@@ -52,14 +55,23 @@ export function Assistant({
   }
 
   function send(text: string) {
-    const clean = text.trim();
+    const clean = text.trim().slice(0, MAX_MESSAGE_LENGTH);
     if (!clean || !profile || !result) return;
     const reply = generateAssistantReply(clean, profile, result);
-    setMessages((current) => [
-      ...current,
-      { id: Date.now(), role: "user", text: clean },
-      { id: Date.now() + 1, role: "assistant", text: reply.message, reply },
-    ]);
+    const userId = nextMessageId.current++;
+    const assistantId = nextMessageId.current++;
+    setMessages((current) =>
+      [
+        ...current,
+        { id: userId, role: "user" as const, text: clean },
+        {
+          id: assistantId,
+          role: "assistant" as const,
+          text: reply.message,
+          reply,
+        },
+      ].slice(-MAX_MESSAGES),
+    );
     setInput("");
   }
 
@@ -118,6 +130,7 @@ export function Assistant({
               value={input}
               onChange={(event) => setInput(event.target.value)}
               placeholder="Ask about transport, energy, food, your score..."
+              maxLength={MAX_MESSAGE_LENGTH}
             />
             <button className="primary-button" type="submit">Send <span aria-hidden="true">→</span></button>
           </form>

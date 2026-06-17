@@ -39,6 +39,7 @@ export function Dashboard({
   const totalPotentialSaving = getCompletedActionsSaving(completedActions);
   const visibleHistory = history.slice(-8);
   const historyMax = Math.max(...visibleHistory.map((item) => item.totalKg), 1);
+  const historyChartHeight = 100;
 
   return (
     <section className="page-width page-section">
@@ -98,13 +99,33 @@ export function Dashboard({
           <span className="section-kicker">PROFILE HISTORY</span>
           <h2>Your recent estimates</h2>
           {history.length > 1 ? (
-            <div className="history-chart">
-              {visibleHistory.map((entry, index) => (
+            <div className="history-chart" role="img" aria-label="Recent footprint estimates">
+              {visibleHistory.map((entry, index) => {
+                const barHeight = Math.max(
+                  12,
+                  (entry.totalKg / historyMax) * historyChartHeight,
+                );
+
+                return (
                   <div className="history-column" key={`${entry.recordedAt}-${index}`}>
-                    <span style={{ height: `${Math.max(12, (entry.totalKg / historyMax) * 100)}%` }} />
+                    <svg
+                      aria-hidden="true"
+                      focusable="false"
+                      preserveAspectRatio="none"
+                      viewBox={`0 0 28 ${historyChartHeight}`}
+                    >
+                      <rect
+                        height={barHeight}
+                        rx="6"
+                        width="28"
+                        x="0"
+                        y={historyChartHeight - barHeight}
+                      />
+                    </svg>
                     <small>{entry.totalKg}</small>
                   </div>
-              ))}
+                );
+              })}
             </div>
           ) : (
             <div className="empty-mini">

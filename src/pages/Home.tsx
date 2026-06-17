@@ -31,7 +31,11 @@ export function Home({ onNavigate }: { onNavigate: (page: PageId) => void }) {
             <span aria-hidden="true">✓</span> Your data stays in this browser.
           </p>
         </div>
-        <div className="hero-visual" aria-label="Example EcoTrack carbon summary">
+        <div
+          className="hero-visual"
+          role="img"
+          aria-label="Example EcoTrack carbon summary"
+        >
           <div className="visual-orbit orbit-one" />
           <div className="visual-orbit orbit-two" />
           <div className="hero-score-card">
@@ -55,9 +59,9 @@ export function Home({ onNavigate }: { onNavigate: (page: PageId) => void }) {
           </div>
           <div className="hero-category-card">
             <div className="mini-bar-label"><span>Transport</span><strong>38%</strong></div>
-            <div className="mini-bar"><span style={{ width: "38%" }} /></div>
+            <div className="mini-bar mini-bar-transport"><span /></div>
             <div className="mini-bar-label"><span>Food</span><strong>27%</strong></div>
-            <div className="mini-bar amber"><span style={{ width: "27%" }} /></div>
+            <div className="mini-bar mini-bar-food amber"><span /></div>
           </div>
         </div>
       </section>

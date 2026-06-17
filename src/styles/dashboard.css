@@ -101,11 +101,67 @@
   background: #edf0ec;
 }
 
-.chart-fill {
+.chart-meter {
   display: block;
+  width: 100%;
   height: 100%;
+  border: 0;
   border-radius: inherit;
-  transition: width 500ms ease;
+  background: #edf0ec;
+}
+
+.chart-meter::-webkit-meter-bar {
+  border: 0;
+  border-radius: inherit;
+  background: #edf0ec;
+}
+
+.chart-meter::-webkit-meter-optimum-value {
+  border-radius: inherit;
+}
+
+.chart-meter::-moz-meter-bar {
+  border-radius: inherit;
+}
+
+.chart-transport::-webkit-meter-optimum-value {
+  background: var(--green-600);
+}
+
+.chart-transport::-moz-meter-bar {
+  background: var(--green-600);
+}
+
+.chart-electricity::-webkit-meter-optimum-value {
+  background: var(--blue-500);
+}
+
+.chart-electricity::-moz-meter-bar {
+  background: var(--blue-500);
+}
+
+.chart-food::-webkit-meter-optimum-value {
+  background: var(--amber-500);
+}
+
+.chart-food::-moz-meter-bar {
+  background: var(--amber-500);
+}
+
+.chart-shopping::-webkit-meter-optimum-value {
+  background: var(--purple-400);
+}
+
+.chart-shopping::-moz-meter-bar {
+  background: var(--purple-400);
+}
+
+.chart-waste::-webkit-meter-optimum-value {
+  background: var(--mint-500);
+}
+
+.chart-waste::-moz-meter-bar {
+  background: var(--mint-500);
 }
 
 .insight-panel {
@@ -264,11 +320,14 @@
   gap: 5px;
 }
 
-.history-column > span {
+.history-column svg {
   width: 100%;
   max-width: 28px;
-  border-radius: 6px 6px 0 0;
-  background: var(--green-600);
+  height: 100%;
+}
+
+.history-column rect {
+  fill: var(--green-600);
 }
 
 .history-column small {
@@ -293,4 +352,3 @@
   font-size: 0.76rem;
   text-align: center;
 }
-

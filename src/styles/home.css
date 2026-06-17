@@ -223,6 +223,14 @@
   background: var(--green-600);
 }
 
+.mini-bar-transport span {
+  width: 38%;
+}
+
+.mini-bar-food span {
+  width: 27%;
+}
+
 .mini-bar.amber span {
   background: var(--amber-500);
 }
@@ -310,4 +318,3 @@
   margin: 0;
   font-size: 0.88rem;
 }
-

@@ -10,6 +10,11 @@ import {
   SHOPPING_OPTIONS,
   TRANSPORT_OPTIONS,
 } from "../data/domainMetadata";
+import {
+  PROFILE_LIMITS,
+  validateProfile,
+  type ProfileErrors,
+} from "../utils/profileValidation";
 
 const DEFAULT_PROFILE: UserProfile = {
   commuteKmPerDay: 10,
@@ -29,7 +34,7 @@ type ProfileProps = {
 
 export function Profile({ profile, onSave }: ProfileProps) {
   const [form, setForm] = useState<UserProfile>(profile ?? DEFAULT_PROFILE);
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [errors, setErrors] = useState<ProfileErrors>({});
 
   function update<K extends keyof UserProfile>(key: K, value: UserProfile[K]) {
     setForm((current) => ({ ...current, [key]: value }));
@@ -38,19 +43,7 @@ export function Profile({ profile, onSave }: ProfileProps) {
 
   function submit(event: FormEvent) {
     event.preventDefault();
-    const nextErrors: Record<string, string> = {};
-    if (!Number.isFinite(form.commuteKmPerDay) || form.commuteKmPerDay < 0) {
-      nextErrors.commuteKmPerDay = "Enter a distance of zero or more.";
-    }
-    if (
-      !Number.isFinite(form.electricityUnitsPerMonth) ||
-      form.electricityUnitsPerMonth < 0
-    ) {
-      nextErrors.electricityUnitsPerMonth = "Enter electricity use of zero or more.";
-    }
-    if (!Number.isFinite(form.onlineOrdersPerMonth) || form.onlineOrdersPerMonth < 0) {
-      nextErrors.onlineOrdersPerMonth = "Enter zero or a positive order count.";
-    }
+    const nextErrors = validateProfile(form);
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length === 0) onSave(form);
   }
@@ -89,14 +82,16 @@ export function Profile({ profile, onSave }: ProfileProps) {
                 <input
                   type="number"
                   min="0"
+                  max={PROFILE_LIMITS.commuteKmPerDay}
                   step="0.5"
                   value={form.commuteKmPerDay}
                   onChange={(event) => update("commuteKmPerDay", Number(event.target.value))}
+                  aria-invalid={Boolean(errors.commuteKmPerDay)}
                   aria-describedby={errors.commuteKmPerDay ? "commute-error" : undefined}
                 />
                 <span>km/day</span>
               </div>
-              {errors.commuteKmPerDay && <small className="field-error" id="commute-error">{errors.commuteKmPerDay}</small>}
+              {errors.commuteKmPerDay && <small className="field-error" id="commute-error" role="alert">{errors.commuteKmPerDay}</small>}
             </label>
           </div>
         </fieldset>
@@ -110,13 +105,15 @@ export function Profile({ profile, onSave }: ProfileProps) {
                 <input
                   type="number"
                   min="0"
+                  max={PROFILE_LIMITS.electricityUnitsPerMonth}
                   value={form.electricityUnitsPerMonth}
                   onChange={(event) => update("electricityUnitsPerMonth", Number(event.target.value))}
+                  aria-invalid={Boolean(errors.electricityUnitsPerMonth)}
                   aria-describedby={errors.electricityUnitsPerMonth ? "electricity-error" : undefined}
                 />
                 <span>units</span>
               </div>
-              {errors.electricityUnitsPerMonth && <small className="field-error" id="electricity-error">{errors.electricityUnitsPerMonth}</small>}
+              {errors.electricityUnitsPerMonth && <small className="field-error" id="electricity-error" role="alert">{errors.electricityUnitsPerMonth}</small>}
             </label>
             <ToggleField
               label="Do you use AC daily?"
@@ -154,11 +151,13 @@ export function Profile({ profile, onSave }: ProfileProps) {
               <input
                 type="number"
                 min="0"
+                max={PROFILE_LIMITS.onlineOrdersPerMonth}
                 value={form.onlineOrdersPerMonth}
                 onChange={(event) => update("onlineOrdersPerMonth", Number(event.target.value))}
+                aria-invalid={Boolean(errors.onlineOrdersPerMonth)}
                 aria-describedby={errors.onlineOrdersPerMonth ? "orders-error" : undefined}
               />
-              {errors.onlineOrdersPerMonth && <small className="field-error" id="orders-error">{errors.onlineOrdersPerMonth}</small>}
+              {errors.onlineOrdersPerMonth && <small className="field-error" id="orders-error" role="alert">{errors.onlineOrdersPerMonth}</small>}
             </label>
           </div>
         </fieldset>
