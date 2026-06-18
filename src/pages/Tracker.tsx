@@ -1,7 +1,7 @@
 import { ActionCard } from "../components/ActionCard";
 import type { PageId } from "../components/Layout/Layout";
 import { ProfileRequiredState } from "../components/ProfileRequiredState";
-import { ACTION_LIBRARY } from "../data/actionLibrary";
+import { ACTION_LIBRARY } from "../config/constants/actionLibrary";
 import type { CompletedAction, EcoAction, UserProfile } from "../types";
 import {
   calculateActionStreak,

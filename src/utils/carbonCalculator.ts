@@ -1,4 +1,4 @@
-import { DEFAULT_COMMUTE_DAYS, EMISSION_FACTORS } from "../data/emissionFactors";
+import { DEFAULT_COMMUTE_DAYS, EMISSION_FACTORS } from "../config/constants/emissionFactors";
 import type {
   CarbonCategory,
   CarbonResult,

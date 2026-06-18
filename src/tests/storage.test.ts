@@ -4,7 +4,8 @@ import {
   getCompletedActions,
   getHistory,
   getProfile,
-} from "../utils/storage";
+  saveProfile,
+} from "../services/storageService";
 import { BASE_PROFILE } from "./fixtures";
 
 const values = new Map<string, string>();
@@ -100,16 +101,32 @@ describe("storage", () => {
     expect(getProfile()).toBeNull();
   });
 
-  it("returns the existing history when the latest estimate is unchanged", () => {
+  it("updates the latest history entry if it occurs on the same day", () => {
     const history = [
       { recordedAt: "2026-06-14T08:00:00.000Z", totalKg: 200, score: 60 },
     ];
-    expect(
-      appendHistory(history, {
-        recordedAt: "2026-06-14T09:00:00.000Z",
-        totalKg: 200,
-        score: 60,
-      }),
-    ).toBe(history);
+    const newEntry = {
+      recordedAt: "2026-06-14T09:00:00.000Z",
+      totalKg: 210,
+      score: 58,
+    };
+    expect(appendHistory(history, newEntry)).toEqual([newEntry]);
+  });
+
+  it("reports storage write failures", () => {
+    vi.stubGlobal("window", {
+      localStorage: {
+        getItem: (key: string) => values.get(key) ?? null,
+        setItem: () => {
+          throw new Error("quota exceeded");
+        },
+      },
+    });
+
+    expect(saveProfile(BASE_PROFILE)).toEqual({
+      ok: false,
+      message: "Browser storage is unavailable, so this change was not saved.",
+    });
   });
 });
+

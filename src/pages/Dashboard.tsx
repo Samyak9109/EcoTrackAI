@@ -3,15 +3,14 @@ import { CategoryChart } from "../components/Dashboard/CategoryChart";
 import { MetricCard } from "../components/Dashboard/MetricCard";
 import type { PageId } from "../components/Layout/Layout";
 import { ProfileRequiredState } from "../components/ProfileRequiredState";
-import { CATEGORY_LABELS } from "../data/domainMetadata";
+import { CATEGORY_LABELS } from "../config/constants/domainMetadata";
 import type {
   CarbonResult,
   CompletedAction,
   FootprintHistoryEntry,
   UserProfile,
 } from "../types";
-import { generateRecommendations } from "../utils/recommendationEngine";
-import { getCompletedActionsSaving } from "../utils/actionTracking";
+import { getDashboardMetrics } from "../utils/dashboardMetrics";
 
 type DashboardProps = {
   profile: UserProfile | null;
@@ -32,14 +31,15 @@ export function Dashboard({
     return <EmptyProfile onNavigate={onNavigate} />;
   }
 
-  const recommendations = generateRecommendations(profile, result, 3);
-  const currentWeekCount = completedActions.filter(
-    (item) => Date.now() - new Date(item.completedAt).getTime() < 7 * 86400000,
-  ).length;
-  const totalPotentialSaving = getCompletedActionsSaving(completedActions);
-  const visibleHistory = history.slice(-8);
-  const historyMax = Math.max(...visibleHistory.map((item) => item.totalKg), 1);
-  const historyChartHeight = 100;
+  const {
+    currentWeekCount,
+    highestCategoryShare,
+    historyChartHeight,
+    historyMax,
+    recommendations,
+    totalPotentialSaving,
+    visibleHistory,
+  } = getDashboardMetrics(profile, result, completedActions, history);
 
   return (
     <section className="page-width page-section">
@@ -72,7 +72,7 @@ export function Dashboard({
 
         <article className="panel insight-panel">
           <span className="section-kicker">BIGGEST OPPORTUNITY</span>
-          <div className="impact-number">{Math.round((result.breakdown[result.highestCategory] / result.totalKg) * 100)}<span>%</span></div>
+          <div className="impact-number">{highestCategoryShare}<span>%</span></div>
           <h2>of your footprint comes from {CATEGORY_LABELS[result.highestCategory].toLowerCase()}</h2>
           <p>
             {recommendations[0]?.description} This is likely to make the most useful
@@ -152,3 +152,4 @@ function EmptyProfile({ onNavigate }: { onNavigate: (page: PageId) => void }) {
     />
   );
 }
+

@@ -1,4 +1,4 @@
-import { ACTION_LIBRARY } from "../data/actionLibrary";
+import { ACTION_LIBRARY } from "../config/constants/actionLibrary";
 import type { CompletedAction } from "../types";
 
 const ACTION_BY_ID = new Map(ACTION_LIBRARY.map((action) => [action.id, action]));

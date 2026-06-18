@@ -3,8 +3,7 @@ import type {
   FootprintHistoryEntry,
   UserProfile,
 } from "../types";
-import { ACTION_LIBRARY } from "../data/actionLibrary";
-import { isUserProfile } from "./profileValidation";
+import { isUserProfile } from "../utils/validation";
 
 const KEYS = {
   profile: "ecotrack_profile",
@@ -12,9 +11,16 @@ const KEYS = {
   history: "ecotrack_history",
 } as const;
 
+import { ACTION_LIBRARY } from "../config/constants/actionLibrary";
 const ACTION_IDS = new Set(ACTION_LIBRARY.map((action) => action.id));
 const MAX_STORED_VALUE_LENGTH = 100_000;
 const MAX_COMPLETED_ACTIONS = 1000;
+
+export type StorageWriteResult =
+  | { ok: true }
+  | { ok: false; message: string };
+
+const STORAGE_WRITE_OK: StorageWriteResult = { ok: true };
 
 function readJson(key: string): unknown {
   try {
@@ -26,16 +32,23 @@ function readJson(key: string): unknown {
   }
 }
 
-function writeJson<T>(key: string, value: T): void {
+function writeJson<T>(key: string, value: T): StorageWriteResult {
   try {
     window.localStorage.setItem(key, JSON.stringify(value));
+    return STORAGE_WRITE_OK;
   } catch {
-    // Storage can be unavailable in private browsing or restricted environments.
+    return {
+      ok: false,
+      message: "Browser storage is unavailable, so this change was not saved.",
+    };
   }
 }
 
-export function saveProfile(profile: UserProfile): void {
-  if (isUserProfile(profile)) writeJson(KEYS.profile, profile);
+export function saveProfile(profile: UserProfile): StorageWriteResult {
+  if (!isUserProfile(profile)) {
+    return { ok: false, message: "Profile data is invalid and was not saved." };
+  }
+  return writeJson(KEYS.profile, profile);
 }
 
 export function getProfile(): UserProfile | null {
@@ -43,16 +56,16 @@ export function getProfile(): UserProfile | null {
   return isUserProfile(stored) ? stored : null;
 }
 
-export function saveCompletedActions(actions: CompletedAction[]): void {
-  writeJson(KEYS.actions, sanitizeCompletedActions(actions));
+export function saveCompletedActions(actions: CompletedAction[]): StorageWriteResult {
+  return writeJson(KEYS.actions, sanitizeCompletedActions(actions));
 }
 
 export function getCompletedActions(): CompletedAction[] {
   return sanitizeCompletedActions(readJson(KEYS.actions));
 }
 
-function saveHistory(history: FootprintHistoryEntry[]): void {
-  writeJson(KEYS.history, history.slice(-12));
+export function saveHistory(history: FootprintHistoryEntry[]): StorageWriteResult {
+  return writeJson(KEYS.history, history.slice(-12));
 }
 
 export function getHistory(): FootprintHistoryEntry[] {
@@ -67,13 +80,18 @@ export function appendHistory(
   entry: FootprintHistoryEntry,
 ): FootprintHistoryEntry[] {
   const latest = history.at(-1);
-  if (latest && latest.totalKg === entry.totalKg && latest.score === entry.score) {
-    return history;
+  const isSameDay =
+    latest && latest.recordedAt.split("T")[0] === entry.recordedAt.split("T")[0];
+
+  if (isSameDay) {
+    const updatedHistory = [...history];
+    updatedHistory[updatedHistory.length - 1] = entry;
+    return updatedHistory;
   }
-  const updatedHistory = [...history, entry].slice(-12);
-  saveHistory(updatedHistory);
-  return updatedHistory;
+
+  return [...history, entry].slice(-12);
 }
+
 
 function sanitizeCompletedActions(value: unknown): CompletedAction[] {
   if (!Array.isArray(value)) return [];

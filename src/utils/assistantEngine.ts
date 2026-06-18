@@ -5,7 +5,7 @@ import type {
   EcoAction,
   UserProfile,
 } from "../types";
-import { formatEnumLabel } from "../data/domainMetadata";
+import { formatEnumLabel } from "../config/constants/domainMetadata";
 import { getActionsForCategory, generateRecommendations } from "./recommendationEngine";
 
 const CATEGORY_LABELS = {
@@ -16,37 +16,21 @@ const CATEGORY_LABELS = {
   waste: "household waste",
 } as const;
 
+const INTENT_PATTERNS: Array<{ pattern: RegExp; intent: AssistantIntent }> = [
+  { pattern: /(7\s*day|seven\s*day|week\s*plan|weekly\s*plan)/, intent: "seven_day_plan" },
+  { pattern: /(what if|instead of|simulate)/, intent: "what_if_simulation" },
+  { pattern: /(score|why is|biggest|highest)/, intent: "score_explanation" },
+  { pattern: /(transport|commute|car|bike|bus|train|travel)/, intent: "transport_help" },
+  { pattern: /(electricity|power|energy|appliance|\bac\b|air condition)/, intent: "electricity_help" },
+  { pattern: /(food|diet|meat|meal|vegan|vegetarian)/, intent: "food_help" },
+  { pattern: /(shop|order|delivery|buy|purchase)/, intent: "shopping_help" },
+  { pattern: /(waste|recycl|rubbish|trash|reuse)/, intent: "waste_help" },
+];
+
 function detectIntent(message: string): AssistantIntent {
   const lower = message.toLowerCase().replace(/-/g, " ");
-
-  if (/(7\s*day|seven\s*day|week\s*plan|weekly\s*plan)/.test(lower)) {
-    return "seven_day_plan";
-  }
-  if (lower.includes("what if") || lower.includes("instead of") || lower.includes("simulate")) {
-    return "what_if_simulation";
-  }
-  if (
-    lower.includes("score") ||
-    lower.includes("why is") ||
-    lower.includes("biggest") ||
-    lower.includes("highest")
-  ) {
-    return "score_explanation";
-  }
-  if (/(transport|commute|car|bike|bus|train|travel)/.test(lower)) {
-    return "transport_help";
-  }
-  if (/(electricity|power|energy|appliance|\bac\b|air condition)/.test(lower)) {
-    return "electricity_help";
-  }
-  if (/(food|diet|meat|meal|vegan|vegetarian)/.test(lower)) {
-    return "food_help";
-  }
-  if (/(shop|order|delivery|buy|purchase)/.test(lower)) {
-    return "shopping_help";
-  }
-  if (/(waste|recycl|rubbish|trash|reuse)/.test(lower)) {
-    return "waste_help";
+  for (const { pattern, intent } of INTENT_PATTERNS) {
+    if (pattern.test(lower)) return intent;
   }
   return "general_reduce";
 }
@@ -88,16 +72,17 @@ export function generateAssistantReply(
     };
   }
 
-  const categoryByIntent = {
+  const categoryByIntent: Partial<Record<AssistantIntent, CarbonCategory>> = {
     transport_help: "transport",
     electricity_help: "electricity",
     food_help: "food",
     shopping_help: "shopping",
     waste_help: "waste",
-  } as const;
+  };
 
-  if (intent in categoryByIntent) {
-    const category = categoryByIntent[intent as keyof typeof categoryByIntent];
+  const category = categoryByIntent[intent];
+
+  if (category) {
     const actions = getActionsForCategory(category, profile, 3);
     return {
       intent,

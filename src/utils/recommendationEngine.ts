@@ -1,4 +1,4 @@
-import { ACTION_LIBRARY } from "../data/actionLibrary";
+import { ACTION_LIBRARY } from "../config/constants/actionLibrary";
 import type { CarbonResult, EcoAction, UserProfile } from "../types";
 
 const DIFFICULTY_WEIGHT = { easy: 3, medium: 2, hard: 1 };

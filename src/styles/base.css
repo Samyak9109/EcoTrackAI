@@ -143,6 +143,18 @@ p {
   padding-block: 72px 100px;
 }
 
+.app-alert {
+  width: min(1180px, calc(100% - 48px));
+  margin: 18px auto 0;
+  padding: 12px 16px;
+  border: 1px solid #fed7aa;
+  border-radius: 8px;
+  background: #fff7ed;
+  color: #9a3412;
+  font-weight: 700;
+}
+/* FIXED: storage failures now have a visible alert style instead of silent UI failure. */
+
 .site-header {
   position: sticky;
   z-index: 20;

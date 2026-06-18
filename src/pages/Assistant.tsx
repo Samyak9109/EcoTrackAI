@@ -1,8 +1,8 @@
-import { useRef, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { ActionCard } from "../components/ActionCard";
 import type { PageId } from "../components/Layout/Layout";
 import { ProfileRequiredState } from "../components/ProfileRequiredState";
-import { formatEnumLabel } from "../data/domainMetadata";
+import { formatEnumLabel } from "../config/constants/domainMetadata";
 import type { AssistantReply, CarbonResult, UserProfile } from "../types";
 import { generateAssistantReply } from "../utils/assistantEngine";
 
@@ -33,15 +33,29 @@ export function Assistant({
 }) {
   const [input, setInput] = useState("");
   const nextMessageId = useRef(2);
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: 1,
-      role: "assistant",
-      text: profile && result
-        ? `I have your profile. Your current biggest category is ${result.highestCategory}. Ask me for advice, a score explanation, or a seven-day plan.`
-        : "Create your lifestyle profile first, then I can give advice based on your habits.",
-    },
-  ]);
+  const [messages, setMessages] = useState<Message[]>(() => {
+    const saved = window.sessionStorage.getItem("ecotrack_assistant_messages");
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch {
+        // ignore JSON parse error
+      }
+    }
+    return [
+      {
+        id: 1,
+        role: "assistant",
+        text: profile && result
+          ? `I have your profile. Your current biggest category is ${result.highestCategory}. Ask me for advice, a score explanation, or a seven-day plan.`
+          : "Create your lifestyle profile first, then I can give advice based on your habits.",
+      },
+    ];
+  });
+
+  useEffect(() => {
+    window.sessionStorage.setItem("ecotrack_assistant_messages", JSON.stringify(messages));
+  }, [messages]);
 
   if (!profile || !result) {
     return (

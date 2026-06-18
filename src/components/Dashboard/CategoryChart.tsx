@@ -1,5 +1,5 @@
 import type { CategoryBreakdown } from "../../types";
-import { CATEGORY_LABELS } from "../../data/domainMetadata";
+import { CATEGORY_LABELS } from "../../config/constants/domainMetadata";
 
 export function CategoryChart({ breakdown }: { breakdown: CategoryBreakdown }) {
   const max = Math.max(...Object.values(breakdown), 1);

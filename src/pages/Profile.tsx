@@ -1,20 +1,16 @@
 import { useState, type FormEvent } from "react";
-import type {
-  DietType,
-  ShoppingFrequency,
-  TransportMode,
-  UserProfile,
-} from "../types";
+import type { UserProfile } from "../types";
 import {
   DIET_OPTIONS,
   SHOPPING_OPTIONS,
   TRANSPORT_OPTIONS,
-} from "../data/domainMetadata";
+} from "../config/constants/domainMetadata";
 import {
   PROFILE_LIMITS,
   validateProfile,
   type ProfileErrors,
 } from "../utils/profileValidation";
+import { parseNumberInput, parseSelectValue } from "../utils/formParsing";
 
 const DEFAULT_PROFILE: UserProfile = {
   commuteKmPerDay: 10,
@@ -67,7 +63,12 @@ export function Profile({ profile, onSave }: ProfileProps) {
               <span>How do you usually commute?</span>
               <select
                 value={form.transportMode}
-                onChange={(event) => update("transportMode", event.target.value as TransportMode)}
+                onChange={(event) =>
+                  update(
+                    "transportMode",
+                    parseSelectValue(event.target.value, TRANSPORT_OPTIONS, form.transportMode),
+                  )
+                }
               >
                 {TRANSPORT_OPTIONS.map((option) => (
                   <option value={option.value} key={option.value}>
@@ -85,7 +86,7 @@ export function Profile({ profile, onSave }: ProfileProps) {
                   max={PROFILE_LIMITS.commuteKmPerDay}
                   step="0.5"
                   value={form.commuteKmPerDay}
-                  onChange={(event) => update("commuteKmPerDay", Number(event.target.value))}
+                  onChange={(event) => update("commuteKmPerDay", parseNumberInput(event.target.value))}
                   aria-invalid={Boolean(errors.commuteKmPerDay)}
                   aria-describedby={errors.commuteKmPerDay ? "commute-error" : undefined}
                 />
@@ -107,7 +108,7 @@ export function Profile({ profile, onSave }: ProfileProps) {
                   min="0"
                   max={PROFILE_LIMITS.electricityUnitsPerMonth}
                   value={form.electricityUnitsPerMonth}
-                  onChange={(event) => update("electricityUnitsPerMonth", Number(event.target.value))}
+                  onChange={(event) => update("electricityUnitsPerMonth", parseNumberInput(event.target.value))}
                   aria-invalid={Boolean(errors.electricityUnitsPerMonth)}
                   aria-describedby={errors.electricityUnitsPerMonth ? "electricity-error" : undefined}
                 />
@@ -128,7 +129,15 @@ export function Profile({ profile, onSave }: ProfileProps) {
           <div className="form-grid three-columns">
             <label className="field">
               <span>Diet type</span>
-              <select value={form.dietType} onChange={(event) => update("dietType", event.target.value as DietType)}>
+              <select
+                value={form.dietType}
+                onChange={(event) =>
+                  update(
+                    "dietType",
+                    parseSelectValue(event.target.value, DIET_OPTIONS, form.dietType),
+                  )
+                }
+              >
                 {DIET_OPTIONS.map((option) => (
                   <option value={option.value} key={option.value}>
                     {option.label}
@@ -138,7 +147,15 @@ export function Profile({ profile, onSave }: ProfileProps) {
             </label>
             <label className="field">
               <span>Shopping frequency</span>
-              <select value={form.shoppingFrequency} onChange={(event) => update("shoppingFrequency", event.target.value as ShoppingFrequency)}>
+              <select
+                value={form.shoppingFrequency}
+                onChange={(event) =>
+                  update(
+                    "shoppingFrequency",
+                    parseSelectValue(event.target.value, SHOPPING_OPTIONS, form.shoppingFrequency),
+                  )
+                }
+              >
                 {SHOPPING_OPTIONS.map((option) => (
                   <option value={option.value} key={option.value}>
                     {option.label}
@@ -153,7 +170,7 @@ export function Profile({ profile, onSave }: ProfileProps) {
                 min="0"
                 max={PROFILE_LIMITS.onlineOrdersPerMonth}
                 value={form.onlineOrdersPerMonth}
-                onChange={(event) => update("onlineOrdersPerMonth", Number(event.target.value))}
+                onChange={(event) => update("onlineOrdersPerMonth", parseNumberInput(event.target.value))}
                 aria-invalid={Boolean(errors.onlineOrdersPerMonth)}
                 aria-describedby={errors.onlineOrdersPerMonth ? "orders-error" : undefined}
               />
@@ -201,3 +218,4 @@ function ToggleField({
     </div>
   );
 }
+

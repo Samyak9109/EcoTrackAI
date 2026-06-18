@@ -1,4 +1,4 @@
-import { DEFAULT_COMMUTE_DAYS } from "../data/emissionFactors";
+import { DEFAULT_COMMUTE_DAYS } from "../config/constants/emissionFactors";
 import type {
   SimulationChanges,
   SimulationResult,

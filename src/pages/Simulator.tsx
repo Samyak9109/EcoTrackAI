@@ -1,14 +1,10 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { PageId } from "../components/Layout/Layout";
 import { ProfileRequiredState } from "../components/ProfileRequiredState";
-import { DIET_OPTIONS, TRANSPORT_OPTIONS } from "../data/domainMetadata";
-import { DEFAULT_COMMUTE_DAYS } from "../data/emissionFactors";
-import type {
-  DietType,
-  SimulationChanges,
-  TransportMode,
-  UserProfile,
-} from "../types";
+import { DIET_OPTIONS, TRANSPORT_OPTIONS } from "../config/constants/domainMetadata";
+import { DEFAULT_COMMUTE_DAYS } from "../config/constants/emissionFactors";
+import type { SimulationChanges, UserProfile } from "../types";
+import { parseNumberInput, parseSelectValue } from "../utils/formParsing";
 import { simulateAction } from "../utils/simulator";
 
 export function Simulator({
@@ -25,6 +21,19 @@ export function Simulator({
     dietType: profile?.dietType,
     onlineOrdersPerMonth: profile?.onlineOrdersPerMonth,
   }));
+
+  useEffect(() => {
+    if (!profile) return;
+
+    setChanges({
+      transportMode: profile.transportMode,
+      commuteDaysPerMonth: DEFAULT_COMMUTE_DAYS,
+      electricityUnitsPerMonth: profile.electricityUnitsPerMonth,
+      dietType: profile.dietType,
+      onlineOrdersPerMonth: profile.onlineOrdersPerMonth,
+    });
+  }, [profile]);
+
 
   const simulation = useMemo(
     () => (profile ? simulateAction(profile, changes) : null),
@@ -64,7 +73,19 @@ export function Simulator({
           <h2>Try a different routine</h2>
           <label className="field">
             <span>Transport mode</span>
-            <select value={changes.transportMode} onChange={(event) => setChanges((current) => ({ ...current, transportMode: event.target.value as TransportMode }))}>
+            <select
+              value={changes.transportMode}
+              onChange={(event) =>
+                setChanges((current) => ({
+                  ...current,
+                  transportMode: parseSelectValue(
+                    event.target.value,
+                    TRANSPORT_OPTIONS,
+                    current.transportMode ?? profile.transportMode,
+                  ),
+                }))
+              }
+            >
               {TRANSPORT_OPTIONS.map((option) => (
                 <option value={option.value} key={option.value}>
                   {option.label}
@@ -74,17 +95,29 @@ export function Simulator({
           </label>
           <label className="field range-field">
             <span>Commute days per month <strong>{changes.commuteDaysPerMonth}</strong></span>
-            <input type="range" min="0" max={DEFAULT_COMMUTE_DAYS} value={changes.commuteDaysPerMonth} onChange={(event) => setChanges((current) => ({ ...current, commuteDaysPerMonth: Number(event.target.value) }))} />
+            <input type="range" min="0" max={DEFAULT_COMMUTE_DAYS} value={changes.commuteDaysPerMonth} onChange={(event) => setChanges((current) => ({ ...current, commuteDaysPerMonth: parseNumberInput(event.target.value) }))} />
             <div><span>0 days</span><span>{DEFAULT_COMMUTE_DAYS} days</span></div>
           </label>
           <label className="field range-field">
             <span>Electricity use <strong>{changes.electricityUnitsPerMonth} units</strong></span>
-            <input type="range" min="0" max={Math.max(400, profile.electricityUnitsPerMonth)} step="5" value={changes.electricityUnitsPerMonth} onChange={(event) => setChanges((current) => ({ ...current, electricityUnitsPerMonth: Number(event.target.value) }))} />
+            <input type="range" min="0" max={Math.max(400, profile.electricityUnitsPerMonth)} step="5" value={changes.electricityUnitsPerMonth} onChange={(event) => setChanges((current) => ({ ...current, electricityUnitsPerMonth: parseNumberInput(event.target.value) }))} />
             <div><span>0</span><span>{Math.max(400, profile.electricityUnitsPerMonth)} units</span></div>
           </label>
           <label className="field">
             <span>Diet type</span>
-            <select value={changes.dietType} onChange={(event) => setChanges((current) => ({ ...current, dietType: event.target.value as DietType }))}>
+            <select
+              value={changes.dietType}
+              onChange={(event) =>
+                setChanges((current) => ({
+                  ...current,
+                  dietType: parseSelectValue(
+                    event.target.value,
+                    DIET_OPTIONS,
+                    current.dietType ?? profile.dietType,
+                  ),
+                }))
+              }
+            >
               {DIET_OPTIONS.map((option) => (
                 <option value={option.value} key={option.value}>
                   {option.label}
@@ -94,7 +127,7 @@ export function Simulator({
           </label>
           <label className="field range-field">
             <span>Online orders <strong>{changes.onlineOrdersPerMonth}/month</strong></span>
-            <input type="range" min="0" max={Math.max(12, profile.onlineOrdersPerMonth)} value={changes.onlineOrdersPerMonth} onChange={(event) => setChanges((current) => ({ ...current, onlineOrdersPerMonth: Number(event.target.value) }))} />
+            <input type="range" min="0" max={Math.max(12, profile.onlineOrdersPerMonth)} value={changes.onlineOrdersPerMonth} onChange={(event) => setChanges((current) => ({ ...current, onlineOrdersPerMonth: parseNumberInput(event.target.value) }))} />
             <div><span>0</span><span>{Math.max(12, profile.onlineOrdersPerMonth)}</span></div>
           </label>
         </div>
@@ -132,3 +165,4 @@ export function Simulator({
     </section>
   );
 }
+

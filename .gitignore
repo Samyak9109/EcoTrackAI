@@ -34,3 +34,6 @@ Thumbs.db
 # Local AI-agent workspace metadata
 .agents/
 .codex/
+.claude/
+.codegraph/
+# FIXED: generated local tool workspaces and indexes are excluded from source control.
